@@ -37,7 +37,7 @@ const accounts = {
 
 const config: HardhatUserConfig = {
   solidity: '0.8.14',
-  // defaultNetwork: 'matic',
+  defaultNetwork: 'matic',
   networks: {
     hardhat: {
       chainId: 1337,

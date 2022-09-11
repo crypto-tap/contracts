@@ -17,49 +17,69 @@ async function main() {
 
   let signers = await ethers.getSigners()
   let deployer = signers[0]
-  const creatorAddr = process.env.ACCOUNT_ADDRESS || '' // hardcode do anonimo -> inserir endereco local
+  const creatorAddr =
+    process.env.ACCOUNT_ADDRESS || '0xf1d292054a63b5a8952a24c7f1e384602149ea86' // hardcode do anonimo -> inserir endereco local
 
+  console.log('creatorAddr -----', creatorAddr)
   console.log(
     `Deployer Address: ${deployer.address} Balance: ` +
       (await deployer.getBalance()).toString()
   )
 
-  console.log('CTT Mock contract: Deploying')
-  const CTTMockFactory = await ethers.getContractFactory('ERC20Mock')
-  const CTTMock = await CTTMockFactory.deploy(
-    'Crypto Tap Token',
-    'CTT',
-    deployer.address,
-    0
-  )
-  await CTTMock.deployed()
+  const CTTTokenAddress = '0x852a314a4c987c4eaf71e1c070920e2e773b2ac1'
+  // console.log('CTT Mock contract: Deploying')
+  // const CTTMockFactory = await ethers.getContractFactory('ERC20Mock')
+  // const CTTMock = await CTTMockFactory.deploy(
+  //   'Crypto Tap Token',
+  //   'CTT',
+  //   deployer.address,
+  //   0
+  // )
+  // await CTTMock.deployed()
 
   console.log('BRZ Mock contract: Deploying')
   const BRZMockFactory = await ethers.getContractFactory('ERC20Mock')
   const BRZMock = await BRZMockFactory.deploy(
     'Brazilian Crypto',
     'BRZ',
-    deployer.address,
-    100.0
+    creatorAddr,
+    10000000
   )
   await BRZMock.deployed()
+
+  const CustodyFactory = await ethers.getContractFactory('Custody')
+  const Custody = await CustodyFactory.deploy(
+    creatorAddr,
+    CTTTokenAddress,
+    BRZMock.address
+  )
+  await Custody.deployed()
 
   console.log('CryptoTapTokenSwap contract: Deploying')
   const CryptoTapTokenSwapFactory = await ethers.getContractFactory(
     'CryptoTapTokenSwap'
   )
   const CryptoTapTokenSwap = await CryptoTapTokenSwapFactory.deploy(
-    deployer.address,
-    CTTMock.address,
-    BRZMock.address
+    creatorAddr,
+    CTTTokenAddress,
+    BRZMock.address,
+    Custody.address
   )
   await CryptoTapTokenSwap.deployed()
+
+  // Give operator role to CryptoTapTokenSwap contract
+  // const OPERATOR_ROLE = await Custody.OPERATOR_ROLE()
+  // await Custody.connect(deployer).grantRole(
+  //   OPERATOR_ROLE,
+  //   CryptoTapTokenSwap.address
+  // )
 
   console.table({
     network: 'mumbai',
     CryptoTapTokenSwap: CryptoTapTokenSwap.address,
-    CTTMock: CTTMock.address,
+    CTT: CTTTokenAddress,
     BRZMock: BRZMock.address,
+    Custody: Custody.address,
     creatorAddr: creatorAddr,
     deployerAddress: deployer.address,
   })

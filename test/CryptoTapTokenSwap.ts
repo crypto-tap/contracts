@@ -92,9 +92,7 @@ describe('Lock', function () {
       await connBRZ.creator.approve(CryptoTapTokenSwap.address, amount)
 
       // call buyCTT
-      await connSwap.creator.buyCTT(2, {
-        value: amount,
-      })
+      await connSwap.creator.buyCTT(2, amount)
 
       expect(await CTTMock.balanceOf(Custody.address)).to.equal(amount)
       expect(await BRZMock.balanceOf(CryptoTapTokenSwap.address)).to.equal(

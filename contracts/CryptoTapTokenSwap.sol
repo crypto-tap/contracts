@@ -45,7 +45,7 @@ contract CryptoTapTokenSwap is AccessControl, Pausable, ReentrancyGuard {
     custodyAddress = _custodyAddress;
   }
 
-  function buyCTT(uint256 _userId)
+  function buyCTT(uint256 _userId, uint256 _amount)
     public
     payable
     onlyRole(OPERATOR_ROLE)
@@ -53,12 +53,12 @@ contract CryptoTapTokenSwap is AccessControl, Pausable, ReentrancyGuard {
   {
     uint256 cttBalance = IERC20(cttTokenAddress).balanceOf(address(this));
 
-    require(cttBalance >= msg.value, 'Not enought $CTT');
-    emit TokenBuy(_userId, msg.value);
+    require(cttBalance >= _amount, 'Not enought $CTT');
+    emit TokenBuy(_userId, _amount);
 
-    IERC20(brzTokenAddress).transferFrom(msg.sender, address(this), msg.value);
-    IERC20(cttTokenAddress).approve(custodyAddress, msg.value);
-    ICustody(custodyAddress).registryInvestment(_userId, msg.value);
+    IERC20(brzTokenAddress).transferFrom(msg.sender, address(this), _amount);
+    IERC20(cttTokenAddress).approve(custodyAddress, _amount);
+    ICustody(custodyAddress).registryInvestment(_userId, _amount);
   }
 
   /**
